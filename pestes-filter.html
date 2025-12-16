@@ -12,7 +12,8 @@
             width: 100%;
             /* Override from host page if needed */
             --pestes-widget-max-width: 1400px;
-            --pestes-accent: #2F5FA7;
+            --pestes-accent: #0061A8;
+            --pestes-accent-hover: #00538F;
         }
 
         #pestes-service-filter,
@@ -193,18 +194,6 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            animation: pestesFadeIn 0.5s ease;
-        }
-
-        @keyframes pestesFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         #pestes-service-filter .service-card:hover {
@@ -254,11 +243,11 @@
         #pestes-service-filter .service-price {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #7CB342;
+            color: var(--pestes-accent);
         }
 
         #pestes-service-filter .service-cta {
-            background: #7CB342;
+            background: var(--pestes-accent);
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
@@ -270,7 +259,7 @@
         }
 
         #pestes-service-filter .service-cta:hover {
-            background: #689F38;
+            background: var(--pestes-accent-hover);
             transform: scale(1.05);
         }
 
