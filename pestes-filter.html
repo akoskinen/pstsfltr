@@ -44,14 +44,15 @@
         /* Segmented Control */
         #pestes-service-filter .segmented-control {
             position: relative;
-            display: inline-flex;
+            display: flex;
             background: var(--pestes-accent);
             border-radius: 999px;
             padding: 2px; /* creates the 1px-ish blue outline around the selected white pill */
-            margin: 0 auto 26px;
+            margin: 0 auto 22px;
             overflow-x: auto;
             gap: 0;
             max-width: 100%;
+            width: fit-content;
         }
 
         #pestes-service-filter .segmented-indicator {
@@ -73,13 +74,13 @@
             position: relative;
             z-index: 1;
             flex: 0 0 auto;
-            padding: 18px 15px;
+            padding: 12px 15px;
             background: transparent;
             border: none;
             border-radius: 999px;
             cursor: pointer;
-            font-size: 1.6rem;
-            font-weight: 800;
+            font-size: 1.05rem;
+            font-weight: 700;
             transition: color 220ms ease;
             white-space: nowrap;
             color: rgba(255, 255, 255, 0.92);
@@ -98,11 +99,12 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 36px;
+            gap: 18px;
             opacity: 0;
             max-height: 0;
             overflow: hidden;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         #pestes-service-filter .checkbox-group.visible {
@@ -114,7 +116,7 @@
         #pestes-service-filter .checkbox-item {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             padding: 0;
             background: transparent;
             border-radius: 0;
@@ -131,9 +133,9 @@
             cursor: pointer;
             appearance: none;
             -webkit-appearance: none;
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
             border: 2px solid var(--pestes-accent);
             background: #fff;
             display: grid;
@@ -143,10 +145,10 @@
 
         #pestes-service-filter .checkbox-item input[type="checkbox"]::after {
             content: '';
-            width: 16px;
-            height: 28px;
-            border-right: 5px solid #fff;
-            border-bottom: 5px solid #fff;
+            width: 8px;
+            height: 14px;
+            border-right: 3px solid #fff;
+            border-bottom: 3px solid #fff;
             transform: rotate(45deg);
             opacity: 0;
             transition: opacity 0.12s ease;
@@ -168,9 +170,9 @@
 
         #pestes-service-filter .checkbox-item label {
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 600;
             color: #111;
-            font-size: 1.4rem;
+            font-size: 1.05rem;
         }
 
         /* Services Grid */
@@ -328,8 +330,8 @@
             }
 
             #pestes-service-filter .segment-option {
-                padding: 14px 22px;
-                font-size: 1.1rem;
+                padding: 10px 14px;
+                font-size: 0.95rem;
             }
         }
 
