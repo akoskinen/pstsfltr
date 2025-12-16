@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pestes Services Filter</title>
+    <style>
+        /* Embed-safe: scope everything to the widget root to avoid affecting the host page */
+        #pestes-service-filter {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            width: 100%;
+            /* Override from host page if needed */
+            --pestes-widget-max-width: 1400px;
+        }
+
+        #pestes-service-filter,
+        #pestes-service-filter * {
+            box-sizing: border-box;
+        }
+
+        /* Filter Controls */
+        #pestes-service-filter .filter-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            max-width: var(--pestes-widget-max-width);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #pestes-service-filter .filter-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Segmented Control */
+        #pestes-service-filter .segmented-control {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 50px;
+            padding: 4px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            gap: 4px;
+        }
+
+        #pestes-service-filter .segment-option {
+            flex: 1;
+            padding: 14px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            color: #666;
+            font-family: inherit;
+        }
+
+        #pestes-service-filter .segment-option.active {
+            background: #2196F3;
+            color: white;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        #pestes-service-filter .segment-option:hover:not(.active) {
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        /* Checkboxes */
+        #pestes-service-filter .checkbox-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #pestes-service-filter .checkbox-group.visible {
+            opacity: 1;
+            max-height: 200px;
+            margin-top: 10px;
+        }
+
+        #pestes-service-filter .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f8f8f8;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        #pestes-service-filter .checkbox-item:hover {
+            background: #e3f2fd;
+        }
+
+        #pestes-service-filter .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #2196F3;
+        }
+
+        #pestes-service-filter .checkbox-item label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Services Grid */
+        #pestes-service-filter .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 30px auto 0;
+            max-width: var(--pestes-widget-max-width);
+        }
+
+        /* Service Card */
+        #pestes-service-filter .service-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            animation: pestesFadeIn 0.5s ease;
+        }
+
+        @keyframes pestesFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #pestes-service-filter .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        #pestes-service-filter .service-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #pestes-service-filter .service-content {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pestes-service-filter .service-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+        }
+
+        #pestes-service-filter .service-description {
+            color: #666;
+            line-height: 1.6;
+            margin: 0 0 16px 0;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        #pestes-service-filter .service-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+
+        #pestes-service-filter .service-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #7CB342;
+        }
+
+        #pestes-service-filter .service-cta {
+            background: #7CB342;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        #pestes-service-filter .service-cta:hover {
+            background: #689F38;
+            transform: scale(1.05);
+        }
+
+        /* Loading State */
+        #pestes-service-filter .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        #pestes-service-filter .loading::after {
+            content: '...';
+            animation: pestesDots 1.5s infinite;
+        }
+
+        @keyframes pestesDots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Empty State */
+        #pestes-service-filter .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        #pestes-service-filter .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        #pestes-service-filter .empty-state-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        #pestes-service-filter .empty-state-subtext {
+            font-size: 0.95rem;
+            color: #bbb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #pestes-service-filter .services-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 16px;
+            }
+
+            #pestes-service-filter .segmented-control {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #pestes-service-filter .segment-option {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #pestes-service-filter .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #pestes-service-filter .filter-section {
+                padding: 20px;
+            }
+
+            #pestes-service-filter .service-footer {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            #pestes-service-filter .service-cta {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="pestes-service-filter">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-title">Valitse alta sopivat lähtökohdat, niin näet relevantit palvelut</div>
+            
+            <!-- Segmented Control -->
+            <div class="segmented-control" id="pestes-primaryTabs"></div>
+            
+            <!-- Checkboxes -->
+            <div class="checkbox-group" id="pestes-checkboxGroup"></div>
+        </div>
+
+        <!-- Services Grid -->
+        <div id="pestes-servicesContainer">
+            <div class="loading">Ladataan palveluita</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            // Set to true when you're ready to load data from Google Sheets (published CSV)
+            useGoogleSheets: true,
+
+            // One Google Sheets *file* (spreadsheet) with TWO tabs:
+            // - Services tab  -> published as CSV (URL below)
+            // - Categories tab -> published as CSV (URL below)
+            //
+            // In Google Sheets: File -> Share -> Publish to web -> pick tab -> CSV -> Publish
+            servicesSheetURL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5pDU4abVMjkQ4IweQ6bJGCkXslgfDLFv0rdfyhaFHt3DhFxOKZVymMjVL9I8ZeAHTq_Oyjy7ROBJ/pub?gid=0&single=true&output=csv',
+            categoriesSheetURL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ5pDU4abVMjkQ4IweQ6bJGCkXslgfDLFv0rdfyhaFHt3DhFxOKZVymMjVL9I8ZeAHTq_Oyjy7ROBJ/pub?gid=1089844985&single=true&output=csv',
+
+            // If this widget is hosted on GitHub Pages and embedded into pestes.fi via iframe,
+            // set this so relative cta_url values like "/tuholaistorjunta" resolve to your main site.
+            // Example: "https://pestes.fi"
+            ctaBaseURL: 'https://pestes.fi',
+            
+            // Demo data structure
+            demoData: {
+                services: [
+                    {
+                        service_id: 1,
+                        service_name: 'Rakenteiden Suojaaminen',
+                        description: 'Jyrsijäsuojaukset, lintuesteet, lintusuojaukset, oravien torjunta',
+                        price: 'alk. 125,00€',
+                        primary_categories: 'yksityinen',
+                        yksityinen_tags: 'mokki,kerrostalo,omakotitalo',
+                        taloyhtio_tags: '-',
+                        yritys_tags: '-',
+                        image_url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop',
+                        cta_text: 'Lue lisää',
+                        cta_url: '#'
+                    },
+                    {
+                        service_id: 2,
+                        service_name: 'Tuholaistorjunta',
+                        description: 'Luteiden ja Rottien torjunta ammattilaisen avulla on tehokasta ja turvallista',
+                        price: 'Pyydä tarjous',
+                        primary_categories: 'yksityinen,taloyhtio,yritys',
+                        yksityinen_tags: 'mokki,kerrostalo,omakotitalo',
+                        taloyhtio_tags: 'kerrostalo,rivitalo',
+                        yritys_tags: 'teollisuus,varasto',
+                        image_url: 'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?w=400&h=300&fit=crop',
+                        cta_text: 'Lue lisää',
+                        cta_url: '#'
+                    },
+                    {
+                        service_id: 3,
+                        service_name: 'Tuhoeläin kartoitukset',
+                        description: 'Kartoitamme kohteesi tuhoelaintilanteen myös ennakoivasti',
+                        price: 'alk. 200€',
+                        primary_categories: 'yksityinen,yritys',
+                        yksityinen_tags: 'mokki,omakotitalo',
+                        taloyhtio_tags: '-',
+                        yritys_tags: 'toimisto,varasto',
+                        image_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop',
+                        cta_text: 'Lue lisää',
+                        cta_url: '#'
+                    },
+                    {
+                        service_id: 5,
+                        service_name: 'Ennaltaehkäisy',
+                        description: 'Säännölliset tarkastukset ja ennaltaehkäisevät toimenpiteet',
+                        price: 'Sopimus',
+                        primary_categories: 'taloyhtio,yritys',
+                        yksityinen_tags: '-',
+                        taloyhtio_tags: 'kerrostalo,rivitalo',
+                        yritys_tags: 'teollisuus,toimisto',
+                        image_url: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop',
+                        cta_text: 'Ota yhteyttä',
+                        cta_url: '#'
+                    },
+                    {
+                        service_id: 6,
+                        service_name: 'Hätäpalvelu 24/7',
+                        description: 'Akuutti tuholaistilanne? Olemme paikalla nopeasti, myös viikonloppuisin',
+                        price: 'alk. 180€',
+                        primary_categories: 'yksityinen,taloyhtio',
+                        yksityinen_tags: 'mokki,kerrostalo,omakotitalo',
+                        taloyhtio_tags: 'kerrostalo,rivitalo',
+                        yritys_tags: '-',
+                        image_url: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=400&h=300&fit=crop',
+                        cta_text: 'Soita nyt',
+                        cta_url: '#'
+                    }
+                ],
+                categories: [
+                    { category_type: 'primary', primary_category: '-', category_id: 'yksityinen', checkbox_label: 'Yksityinen', display_order: 1 },
+                    { category_type: 'primary', primary_category: '-', category_id: 'taloyhtio', checkbox_label: 'Taloyhtiö', display_order: 2 },
+                    { category_type: 'primary', primary_category: '-', category_id: 'yritys', checkbox_label: 'Yritys', display_order: 3 },
+                    { category_type: 'secondary', primary_category: 'yksityinen', category_id: 'mokki', checkbox_label: 'Mökki', display_order: 1 },
+                    { category_type: 'secondary', primary_category: 'yksityinen', category_id: 'kerrostalo', checkbox_label: 'Kerrostalo', display_order: 2 },
+                    { category_type: 'secondary', primary_category: 'yksityinen', category_id: 'omakotitalo', checkbox_label: 'Omakotitalo', display_order: 3 },
+                    { category_type: 'secondary', primary_category: 'taloyhtio', category_id: 'kerrostalo', checkbox_label: 'Kerrostalo', display_order: 1 },
+                    { category_type: 'secondary', primary_category: 'taloyhtio', category_id: 'rivitalo', checkbox_label: 'Rivitalo', display_order: 2 },
+                    { category_type: 'secondary', primary_category: 'yritys', category_id: 'teollisuus', checkbox_label: 'Teollisuus', display_order: 1 },
+                    { category_type: 'secondary', primary_category: 'yritys', category_id: 'varasto', checkbox_label: 'Varasto', display_order: 2 },
+                    { category_type: 'secondary', primary_category: 'yritys', category_id: 'toimisto', checkbox_label: 'Toimisto', display_order: 3 },
+                ]
+            }
+        };
+
+        // State
+        let state = {
+            services: [],
+            categories: [],
+            activePrimaryCategory: '',
+            checkedSecondaryCategories: new Set(),
+            primaryCategories: [],
+            secondaryCategoriesByPrimary: {},
+            ui: {
+                root: null,
+                primaryTabs: null,
+                checkboxGroup: null,
+                servicesContainer: null
+            }
+        };
+
+        // Initialize
+        async function init() {
+            try {
+                // Cache UI references (scoped widget)
+                state.ui.root = document.getElementById('pestes-service-filter');
+                state.ui.primaryTabs = document.getElementById('pestes-primaryTabs');
+                state.ui.checkboxGroup = document.getElementById('pestes-checkboxGroup');
+                state.ui.servicesContainer = document.getElementById('pestes-servicesContainer');
+
+                if (CONFIG.useGoogleSheets) {
+                    if (window.location.protocol === 'file:') {
+                        showError('Google Sheets -data ei lataudu suoraan file://-osoitteesta. Testaa avaamalla tämä tiedosto local serverin kautta (esim. http://localhost:8000) tai hostaa se verkkoon (Squarespace/iframe).');
+                        return;
+                    }
+                    if (!CONFIG.servicesSheetURL || !CONFIG.categoriesSheetURL ||
+                        CONFIG.servicesSheetURL.includes('YOUR_') || CONFIG.categoriesSheetURL.includes('YOUR_')) {
+                        throw new Error('Google Sheets URLs missing. Set CONFIG.servicesSheetURL and CONFIG.categoriesSheetURL.');
+                    }
+                    await loadFromGoogleSheets();
+                } else {
+                    loadDemoData();
+                }
+                
+                processCategories();
+                renderPrimaryTabs();
+                
+                // Set first tab as active by default
+                if (state.primaryCategories.length > 0) {
+                    setActivePrimaryCategory(state.primaryCategories[0].category_id);
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Palveluiden lataaminen epäonnistui. Yritä myöhemmin uudelleen.');
+            }
+        }
+
+        // Load demo data
+        function loadDemoData() {
+            state.services = CONFIG.demoData.services;
+            state.categories = CONFIG.demoData.categories;
+        }
+
+        // Load from Google Sheets (CSV)
+        async function loadFromGoogleSheets() {
+            let servicesResponse;
+            let categoriesResponse;
+
+            try {
+                [servicesResponse, categoriesResponse] = await Promise.all([
+                    fetch(CONFIG.servicesSheetURL, { cache: 'no-store' }),
+                    fetch(CONFIG.categoriesSheetURL, { cache: 'no-store' })
+                ]);
+            } catch (err) {
+                // Most common causes: CORS (especially when testing) or a non-published Google Sheets link
+                throw new Error(
+                    'Google Sheets -CSV:n haku epäonnistui (todennäköisesti CORS tai linkki ei ole "Publish to web"). ' +
+                    'Varmista että molemmat tabit on julkaistu CSV-muodossa (Publish to web) ja testaa sivu http(s)://-osoitteesta (ei file://).'
+                );
+            }
+
+            if (!servicesResponse.ok) {
+                throw new Error(`Failed to load Services CSV: ${servicesResponse.status} ${servicesResponse.statusText}`);
+            }
+            if (!categoriesResponse.ok) {
+                throw new Error(`Failed to load Categories CSV: ${categoriesResponse.status} ${categoriesResponse.statusText}`);
+            }
+
+            const [servicesCSV, categoriesCSV] = await Promise.all([
+                servicesResponse.text(),
+                categoriesResponse.text()
+            ]);
+
+            const services = parseCSVToObjects(servicesCSV)
+                .filter(row => row.service_id && String(row.service_id).trim() !== '');
+
+            const categories = parseCSVToObjects(categoriesCSV)
+                .filter(row => row.category_id && String(row.category_id).trim() !== '');
+
+            // Normalize types + whitespace
+            services.forEach(s => {
+                if (typeof s.primary_categories === 'string') s.primary_categories = s.primary_categories.trim();
+            });
+
+            categories.forEach(c => {
+                if (typeof c.category_type === 'string') c.category_type = c.category_type.trim();
+                if (typeof c.primary_category === 'string') c.primary_category = c.primary_category.trim();
+                if (typeof c.category_id === 'string') c.category_id = c.category_id.trim();
+                if (typeof c.checkbox_label === 'string') c.checkbox_label = c.checkbox_label.trim();
+                if (typeof c.display_order === 'string') c.display_order = Number(c.display_order.trim() || 0);
+            });
+
+            state.services = services;
+            state.categories = categories;
+        }
+
+        // RFC4180-ish CSV parser (handles quoted fields with commas/newlines)
+        function parseCSV(csvText) {
+            const rows = [];
+            let row = [];
+            let field = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < csvText.length; i++) {
+                const char = csvText[i];
+                const next = csvText[i + 1];
+
+                if (inQuotes) {
+                    if (char === '"' && next === '"') {
+                        field += '"';
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        field += char;
+                    }
+                    continue;
+                }
+
+                if (char === '"') {
+                    inQuotes = true;
+                    continue;
+                }
+
+                if (char === ',') {
+                    row.push(field);
+                    field = '';
+                    continue;
+                }
+
+                if (char === '\r') {
+                    continue;
+                }
+
+                if (char === '\n') {
+                    row.push(field);
+                    rows.push(row);
+                    row = [];
+                    field = '';
+                    continue;
+                }
+
+                field += char;
+            }
+
+            // last field/row
+            row.push(field);
+            rows.push(row);
+
+            // Trim trailing completely-empty rows
+            while (rows.length > 0 && rows[rows.length - 1].every(cell => String(cell ?? '').trim() === '')) {
+                rows.pop();
+            }
+
+            return rows;
+        }
+
+        function parseCSVToObjects(csvText) {
+            const rows = parseCSV(csvText);
+            if (rows.length === 0) return [];
+
+            const headers = rows[0].map(h => String(h ?? '').trim());
+            const out = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i];
+                const obj = {};
+                headers.forEach((header, idx) => {
+                    if (!header) return;
+                    obj[header] = values[idx] !== undefined ? String(values[idx]).trim() : '';
+                });
+                out.push(obj);
+            }
+
+            return out;
+        }
+
+        // Process categories into usable structures
+        function processCategories() {
+            state.primaryCategories = state.categories
+                .filter(cat => cat.category_type === 'primary')
+                .sort((a, b) => a.display_order - b.display_order);
+            
+            state.secondaryCategoriesByPrimary = {};
+            state.categories
+                .filter(cat => cat.category_type === 'secondary')
+                .forEach(cat => {
+                    if (!state.secondaryCategoriesByPrimary[cat.primary_category]) {
+                        state.secondaryCategoriesByPrimary[cat.primary_category] = [];
+                    }
+                    state.secondaryCategoriesByPrimary[cat.primary_category].push(cat);
+                });
+            
+            // Sort secondary categories by display_order
+            Object.keys(state.secondaryCategoriesByPrimary).forEach(key => {
+                state.secondaryCategoriesByPrimary[key].sort((a, b) => a.display_order - b.display_order);
+            });
+        }
+
+        // Render primary tabs (segmented control)
+        function renderPrimaryTabs() {
+            const container = state.ui.primaryTabs;
+            container.innerHTML = state.primaryCategories.map(cat => `
+                <button class="segment-option" data-category="${cat.category_id}">
+                    ${cat.checkbox_label}
+                </button>
+            `).join('');
+            
+            // Add event listeners
+            container.querySelectorAll('.segment-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setActivePrimaryCategory(btn.dataset.category);
+                });
+            });
+        }
+
+        // Set active primary category
+        function setActivePrimaryCategory(categoryId) {
+            state.activePrimaryCategory = categoryId;
+            state.checkedSecondaryCategories.clear();
+            
+            // Update UI
+            state.ui.root.querySelectorAll('.segment-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === categoryId);
+            });
+            
+            renderSecondaryCheckboxes();
+            renderServices();
+        }
+
+        // Render secondary checkboxes
+        function renderSecondaryCheckboxes() {
+            const container = state.ui.checkboxGroup;
+            const secondaries = state.secondaryCategoriesByPrimary[state.activePrimaryCategory] || [];
+            
+            if (secondaries.length === 0) {
+                container.classList.remove('visible');
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = secondaries.map(cat => `
+                <div class="checkbox-item">
+                    <input type="checkbox" id="check-${cat.category_id}" value="${cat.category_id}">
+                    <label for="check-${cat.category_id}">${cat.checkbox_label}</label>
+                </div>
+            `).join('');
+            
+            container.classList.add('visible');
+            
+            // Add event listeners
+            container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        state.checkedSecondaryCategories.add(e.target.value);
+                    } else {
+                        state.checkedSecondaryCategories.delete(e.target.value);
+                    }
+                    renderServices();
+                });
+            });
+        }
+
+        // Filter services based on current state
+        function getFilteredServices() {
+            // First filter: primary category
+            let filtered = state.services.filter(service => {
+                const primaryCats = service.primary_categories.split(',').map(c => c.trim());
+                return primaryCats.includes(state.activePrimaryCategory);
+            });
+            
+            // Second filter: secondary categories (OR logic)
+            if (state.checkedSecondaryCategories.size > 0) {
+                const tagsColumn = `${state.activePrimaryCategory}_tags`;
+                
+                filtered = filtered.filter(service => {
+                    const serviceTags = service[tagsColumn];
+                    
+                    // If service has no tags for this category, don't show it
+                    if (!serviceTags || serviceTags === '-') {
+                        return false;
+                    }
+                    
+                    const tags = serviceTags.split(',').map(t => t.trim());
+                    
+                    // OR logic: show if ANY checked category matches
+                    return Array.from(state.checkedSecondaryCategories).some(checked => 
+                        tags.includes(checked)
+                    );
+                });
+            }
+            
+            return filtered;
+        }
+
+        // Render services
+        function renderServices() {
+            const container = state.ui.servicesContainer;
+            const filtered = getFilteredServices();
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">Ei palveluita valituilla suodattimilla</div>
+                        <div class="empty-state-subtext">Kokeile muuttaa valintoja</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="services-grid">
+                    ${filtered.map(service => `
+                        <div class="service-card">
+                            <img src="${service.image_url}" alt="${service.service_name}" class="service-image" onerror="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
+                            <div class="service-content">
+                                <h3 class="service-title">${service.service_name}</h3>
+                                <p class="service-description">${service.description}</p>
+                                <div class="service-footer">
+                                    <span class="service-price">${service.price}</span>
+                                    <a href="${safeHref(service.cta_url)}" class="service-cta" target="_top">${service.cta_text}</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Only allow http(s) and relative URLs. Blocks "javascript:" etc.
+        function safeHref(raw) {
+            const value = String(raw ?? '').trim();
+            if (!value) return '#';
+
+            try {
+                const base = String(CONFIG.ctaBaseURL ?? '').trim() || window.location.href;
+                const url = new URL(value, base);
+                const protocol = url.protocol.toLowerCase();
+                if (protocol === 'http:' || protocol === 'https:') return url.href;
+            } catch (_) {
+                // If it's a relative URL without URL() parsing (rare), allow basic safe patterns
+            }
+
+            if (value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) return value;
+            return '#';
+        }
+
+        // Show error
+        function showError(message) {
+            const container = state.ui.servicesContainer;
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <div class="empty-state-text">${message}</div>
+                </div>
+            `;
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

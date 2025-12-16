@@ -1,0 +1,12 @@
+category_type,primary_category,category_id,checkbox_label,display_order
+primary,-,yksityinen,Yksityinen,1
+primary,-,taloyhtio,Taloyhtiö,2
+primary,-,yritys,Yritys,3
+secondary,yksityinen,mokki,Mökki,1
+secondary,yksityinen,kerrostalo,Kerrostalo,2
+secondary,yksityinen,omakotitalo,Omakotitalo,3
+secondary,taloyhtio,kerrostalo,Kerrostalo,1
+secondary,taloyhtio,rivitalo,Rivitalo,2
+secondary,yritys,teollisuus,Teollisuus,1
+secondary,yritys,varasto,Varasto,2
+secondary,yritys,toimisto,Toimisto,3
