@@ -42,6 +42,16 @@
             letter-spacing: 1px;
         }
 
+        #pestes-service-filter .results-count {
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.6px;
+            color: rgba(0, 0, 0, 0.45);
+            text-align: center;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
         /* Segmented Control */
         #pestes-service-filter .segmented-control {
             position: relative;
@@ -350,6 +360,7 @@
         <!-- Filter Section -->
         <div class="filter-section">
             <div class="filter-title">Valitse alta sopivat lähtökohdat, niin näet relevantit palvelut</div>
+            <div class="results-count" id="pestes-resultsCount" aria-live="polite"></div>
             
             <!-- Segmented Control -->
             <div class="segmented-control" id="pestes-primaryTabs"></div>
@@ -480,7 +491,8 @@
                 root: null,
                 primaryTabs: null,
                 checkboxGroup: null,
-                servicesContainer: null
+                servicesContainer: null,
+                resultsCount: null
             }
         };
 
@@ -492,6 +504,7 @@
                 state.ui.primaryTabs = document.getElementById('pestes-primaryTabs');
                 state.ui.checkboxGroup = document.getElementById('pestes-checkboxGroup');
                 state.ui.servicesContainer = document.getElementById('pestes-servicesContainer');
+                state.ui.resultsCount = document.getElementById('pestes-resultsCount');
 
                 if (CONFIG.useGoogleSheets) {
                     if (window.location.protocol === 'file:') {
@@ -804,6 +817,8 @@
         function renderServices() {
             const container = state.ui.servicesContainer;
             const filtered = getFilteredServices();
+
+            updateResultsCount(filtered.length);
             
             if (filtered.length === 0) {
                 container.innerHTML = `
@@ -833,6 +848,20 @@
                     `).join('')}
                 </div>
             `;
+        }
+
+        function updateResultsCount(shownCount) {
+            if (!state.ui.resultsCount) return;
+
+            // Show overall impact: how many are visible vs total in the entire system
+            const totalOverall = state.services.length;
+
+            if (!state.activePrimaryCategory) {
+                state.ui.resultsCount.textContent = '';
+                return;
+            }
+
+            state.ui.resultsCount.textContent = `Näytetään ${shownCount} palvelua / ${totalOverall}`;
         }
 
         // Only allow http(s) and relative URLs. Blocks "javascript:" etc.
