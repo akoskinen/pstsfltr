@@ -392,7 +392,8 @@
             // If this widget is hosted on GitHub Pages and embedded into pestes.fi via iframe,
             // set this so relative cta_url values like "/tuholaistorjunta" resolve to your main site.
             // Example: "https://pestes.fi"
-            ctaBaseURL: 'https://pestes.fi',
+            // Leave empty to auto-detect from the embedding page (via document.referrer).
+            ctaBaseURL: '',
             
             // Demo data structure
             demoData: {
@@ -487,6 +488,7 @@
             checkedSecondaryCategories: new Set(),
             primaryCategories: [],
             secondaryCategoriesByPrimary: {},
+            resolvedCtaBaseURL: '',
             ui: {
                 root: null,
                 primaryTabs: null,
@@ -505,6 +507,7 @@
                 state.ui.checkboxGroup = document.getElementById('pestes-checkboxGroup');
                 state.ui.servicesContainer = document.getElementById('pestes-servicesContainer');
                 state.ui.resultsCount = document.getElementById('pestes-resultsCount');
+                state.resolvedCtaBaseURL = resolveCtaBaseURL();
 
                 if (CONFIG.useGoogleSheets) {
                     if (window.location.protocol === 'file:') {
@@ -870,7 +873,7 @@
             if (!value) return '#';
 
             try {
-                const base = String(CONFIG.ctaBaseURL ?? '').trim() || window.location.href;
+                const base = state.resolvedCtaBaseURL || window.location.href;
                 const url = new URL(value, base);
                 const protocol = url.protocol.toLowerCase();
                 if (protocol === 'http:' || protocol === 'https:') return url.href;
@@ -880,6 +883,29 @@
 
             if (value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) return value;
             return '#';
+        }
+
+        function resolveCtaBaseURL() {
+            const manual = String(CONFIG.ctaBaseURL ?? '').trim();
+            if (manual) return manual.replace(/\/+$/, '');
+
+            // In an iframe, this is typically the Squarespace page URL that embedded the widget.
+            const ref = String(document.referrer ?? '').trim();
+            if (!ref) return '';
+
+            try {
+                const url = new URL(ref);
+                // Optional: keep it conservative — only allow known hosts
+                const allowedHosts = new Set([
+                    'uusipestes.squarespace.com',
+                    'pestes.fi',
+                    'www.pestes.fi'
+                ]);
+                if (!allowedHosts.has(url.hostname)) return '';
+                return url.origin;
+            } catch (_) {
+                return '';
+            }
         }
 
         // Show error
