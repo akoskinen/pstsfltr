@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pestes Config</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" id="app">
+      <header class="header">
+        <div class="header__left">
+          <div class="brand">
+            <div class="brand__title">pestes-config</div>
+            <div class="brand__subtitle">Konfiguroi kategoriat ja palvelut → vie CSV Google Sheetsiin</div>
+          </div>
+        </div>
+        <div class="header__right">
+          <button class="btn btn--ghost" id="resetBtn" type="button">Tyhjennä</button>
+          <button class="btn" id="exportBtn" type="button">Vie CSV</button>
+        </div>
+      </header>
+
+      <section class="grid">
+        <section class="card">
+          <div class="card__header">
+            <h2>1) Pääkategoriat (tabs)</h2>
+            <div class="muted">Esim. yksityinen / taloyhtio / yritys</div>
+          </div>
+
+          <div class="row row--wrap">
+            <div class="field">
+              <label for="primaryId">ID (lowercase)</label>
+              <input id="primaryId" placeholder="esim. yksityinen" />
+            </div>
+            <div class="field">
+              <label for="primaryLabel">Nimi</label>
+              <input id="primaryLabel" placeholder="esim. Yksityinen" />
+            </div>
+            <div class="field field--small">
+              <label for="primaryOrder">Järjestys</label>
+              <input id="primaryOrder" type="number" min="1" value="1" />
+            </div>
+            <div class="field field--actions">
+              <label>&nbsp;</label>
+              <button class="btn" id="addPrimaryBtn" type="button">Lisää</button>
+            </div>
+          </div>
+
+          <div class="tableWrap">
+            <table class="table" aria-label="Primary categories">
+              <thead>
+                <tr>
+                  <th>Järjestys</th>
+                  <th>ID</th>
+                  <th>Nimi</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="primariesTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__header">
+            <h2>2) Alakategoriat (checkboxes)</h2>
+            <div class="muted">Alakategoriat ovat sidottuja valittuun pääkategoriaan</div>
+          </div>
+
+          <div class="row row--wrap">
+            <div class="field">
+              <label for="secondaryPrimarySelect">Pääkategoria</label>
+              <select id="secondaryPrimarySelect"></select>
+            </div>
+            <div class="field">
+              <label for="secondaryId">ID (lowercase)</label>
+              <input id="secondaryId" placeholder="esim. kerrostalo" />
+            </div>
+            <div class="field">
+              <label for="secondaryLabel">Nimi</label>
+              <input id="secondaryLabel" placeholder="esim. Kerrostalo" />
+            </div>
+            <div class="field field--small">
+              <label for="secondaryOrder">Järjestys</label>
+              <input id="secondaryOrder" type="number" min="1" value="1" />
+            </div>
+            <div class="field field--actions">
+              <label>&nbsp;</label>
+              <button class="btn" id="addSecondaryBtn" type="button">Lisää</button>
+            </div>
+          </div>
+
+          <div class="tableWrap">
+            <table class="table" aria-label="Secondary categories">
+              <thead>
+                <tr>
+                  <th>Järjestys</th>
+                  <th>ID</th>
+                  <th>Nimi</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="secondariesTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card card--full">
+          <div class="card__header">
+            <h2>3) Palvelut</h2>
+            <div class="muted">Lisää palvelut ja määritä missä pääkategorioissa / alakategorioissa ne näkyvät</div>
+          </div>
+
+          <div class="row row--wrap">
+            <div class="field field--small">
+              <label for="serviceId">service_id</label>
+              <input id="serviceId" type="number" min="1" placeholder="1" />
+            </div>
+            <div class="field">
+              <label for="serviceName">Otsikko</label>
+              <input id="serviceName" placeholder="esim. Tuholaistorjunta" />
+            </div>
+            <div class="field">
+              <label for="servicePrice">Hinta</label>
+              <input id="servicePrice" placeholder="esim. alk. 180€ / Pyydä tarjous" />
+            </div>
+          </div>
+
+          <div class="row row--wrap">
+            <div class="field field--full">
+              <label for="serviceDesc">Kuvaus</label>
+              <textarea id="serviceDesc" rows="3" placeholder="Lyhyt kuvaus..."></textarea>
+            </div>
+          </div>
+
+          <div class="row row--wrap">
+            <div class="field">
+              <label for="serviceImage">Image URL</label>
+              <input id="serviceImage" placeholder="https://..." />
+            </div>
+            <div class="field">
+              <label for="serviceCtaText">CTA teksti</label>
+              <input id="serviceCtaText" placeholder="esim. Lue lisää" />
+            </div>
+            <div class="field">
+              <label for="serviceCtaUrl">CTA URL</label>
+              <input id="serviceCtaUrl" placeholder="/tuholaistorjunta (tai https://...)" />
+            </div>
+          </div>
+
+          <div class="tags" id="serviceTagMatrix"></div>
+
+          <div class="row row--wrap row--between">
+            <div class="muted" id="servicePreview"></div>
+            <div class="row">
+              <button class="btn btn--ghost" id="clearServiceFormBtn" type="button">Tyhjennä lomake</button>
+              <button class="btn" id="saveServiceBtn" type="button">Tallenna palvelu</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row row--between">
+            <h3 class="h3">Tallennetut palvelut</h3>
+            <div class="muted" id="serviceCount"></div>
+          </div>
+
+          <div class="tableWrap">
+            <table class="table" aria-label="Services">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Otsikko</th>
+                  <th>Pääkategoriat</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="servicesTbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="card">
+        <div class="card__header">
+          <h2>Vienti / tuonti</h2>
+          <div class="muted">Vie CSV:t Google Sheetsiin tai ota JSON-varmuuskopio</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row row--between">
+          <h3 class="h3">Tuo nykyiset tiedot Google Sheetsistä</h3>
+          <div class="muted">Käyttää “Publish to web” CSV -linkkejä</div>
+        </div>
+
+        <div class="row row--wrap">
+          <div class="field field--full">
+            <label for="importServicesUrl">Services CSV URL</label>
+            <input id="importServicesUrl" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&output=csv" />
+          </div>
+          <div class="field field--full">
+            <label for="importCategoriesUrl">Categories CSV URL</label>
+            <input id="importCategoriesUrl" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&output=csv" />
+          </div>
+        </div>
+
+        <div class="row row--wrap">
+          <button class="btn" id="importFromSheetsBtn" type="button">Tuo Sheetsistä</button>
+          <div class="muted">Tämä korvaa nykyisen konfiguraation tässä työkalussa.</div>
+        </div>
+
+        <div class="row row--wrap">
+          <button class="btn" id="downloadServicesCsvBtn" type="button">Lataa Services.csv</button>
+          <button class="btn" id="downloadCategoriesCsvBtn" type="button">Lataa Categories.csv</button>
+          <button class="btn btn--ghost" id="downloadJsonBtn" type="button">Lataa JSON varmuuskopio</button>
+          <label class="btn btn--ghost fileBtn" for="importJsonInput">
+            Tuo JSON
+            <input id="importJsonInput" type="file" accept="application/json" />
+          </label>
+        </div>
+
+        <div class="note">
+          <div class="note__title">Google Sheets -vinkki</div>
+          <div class="note__body">
+            Tee kaksi välilehteä: <b>Services</b> ja <b>Categories</b>. Voit importoida nämä CSV:t suoraan niihin.
+            Widget käyttää sarakkeita muodossa <code>&lt;primary_id&gt;_tags</code> (esim. <code>yksityinen_tags</code>).
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="muted">Tallennus: selaimen localStorage (vain tällä laitteella). Suositus: lataa JSON-varmuuskopio.</div>
+        <div class="status" id="status"></div>
+      </footer>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
+
