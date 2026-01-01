@@ -844,7 +844,7 @@
                                 <p class="service-description">${service.description}</p>
                                 <div class="service-footer">
                                     <span class="service-price">${service.price}</span>
-                                    <a href="${safeHref(service.cta_url)}" class="service-cta" target="_top">${service.cta_text}</a>
+                                    <a href="${safeHref(service.cta_url)}" class="service-cta" onclick="handleCTAClick(event, '${service.cta_url}')">${service.cta_text}</a>
                                 </div>
                             </div>
                         </div>
@@ -917,6 +917,43 @@
                     <div class="empty-state-text">${message}</div>
                 </div>
             `;
+        }
+
+        // Cross-iframe communication: tell parent to load product
+        function handleCTAClick(event, productUrl) {
+            event.preventDefault();
+            
+            // Check if this is an Ecwid product link (starts with #!/)
+            const isEcwidProduct = productUrl.startsWith('#!/');
+            
+            if (isEcwidProduct && window.parent !== window) {
+                // We're in an iframe and it's an Ecwid product - send message to parent
+                window.parent.postMessage({
+                    type: 'PESTES_LOAD_PRODUCT',
+                    productUrl: productUrl
+                }, 'https://pestes.fi');
+                
+                // Also try wildcard for development/www subdomain
+                window.parent.postMessage({
+                    type: 'PESTES_LOAD_PRODUCT',
+                    productUrl: productUrl
+                }, '*');
+            } else {
+                // Regular page link - navigate normally
+                // Build full URL if it's a relative path
+                const fullUrl = productUrl.startsWith('http') || productUrl.startsWith('/') 
+                    ? productUrl 
+                    : `https://pestes.fi/${productUrl}`;
+                
+                // If we're in an iframe, target the parent window
+                if (window.parent !== window) {
+                    window.parent.location.href = fullUrl;
+                } else {
+                    window.location.href = fullUrl;
+                }
+            }
+            
+            return false;
         }
 
         // Start the app
